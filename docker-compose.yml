@@ -3,12 +3,12 @@ services:
   arangodb:
     image: arangodb:3.8
     environment:
-      ARANGO_ROOT_PASSWORD: "uhLDs3FMVTf4pS?5qjFespCNDPXf.4.?TZ9jFfeXEvxeXwC2USpt7DDuHf4Lj4Nno3pLwZQ7XyEFZRvNn zYbRmTr..hh?.RNdLbuox5be9ZMUUdLU342TgTAYzE WxY"
+      ARANGO_ROOT_PASSWORD: "${ARANGODB_PASSWORD}"
     volumes:
       - "arangodb-data-store:/var/lib/arangodb3"
       - "arangodb-extension-store:/var/lib/arangodb3-apps"
     ports:
-      - "8529:8529"
+      - "${ARANGODB_PORT}:8529"
 
 volumes:
   arangodb-data-store:
