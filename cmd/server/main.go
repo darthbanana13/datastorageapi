@@ -1,15 +1,22 @@
 package main
 
 import (
-    "os"
-    "fmt"
+	"os"
+	"fmt"
+	"net/http"
 
-    "github.com/darthbanana13/datastorageapi/pkg/localpath"
-    initLog "github.com/darthbanana13/datastorageapi/pkg/initlogrusfromtext"
+	"github.com/darthbanana13/datastorageapi/pkg/localpath"
+	initLog "github.com/darthbanana13/datastorageapi/pkg/initlogrusfromtext"
 
-    log "github.com/sirupsen/logrus"
-    "github.com/joho/godotenv"
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	log "github.com/sirupsen/logrus"
 )
+
+type TempSaveData struct {
+  Text      string `json:"text"`
+  Language  string `json:"language"`
+}
 
 func init() {
   appDir, err := localpath.Get()
@@ -28,5 +35,29 @@ func init() {
   }
 }
 
+func tempSaveData(c *gin.Context) {
+  var chatMessage TempSaveData
+  if err := c.ShouldBindJSON(&chatMessage); err != nil {
+    c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+  }
+  c.JSON(
+    http.StatusOK,
+    gin.H{
+      "message": "received info",
+      "text": chatMessage.Text,
+      "language": chatMessage.Language,
+      "customerId": c.Param("customerId"),
+      "dialogId": c.Param("dialogId"),
+      "error": "none",
+    },
+  )
+}
+
 func main() {
+  router := gin.Default()
+
+  router.POST("/data/:customerId/:dialogId", tempSaveData)
+
+  //TODO: Handle default value
+  router.Run(os.Getenv("SERVER_ADDRESS"))
 }
