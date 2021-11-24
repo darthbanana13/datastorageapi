@@ -3,11 +3,11 @@ package main
 import (
 	"os"
 	"fmt"
-	"time"
 	"net/http"
 	"strconv"
 
 	"github.com/darthbanana13/datastorageapi/pkg/localpath"
+	chat "github.com/darthbanana13/datastorageapi/internal/model/chat"
 	arangoInit "github.com/darthbanana13/datastorageapi/pkg/initArangoDb"
 	initLog "github.com/darthbanana13/datastorageapi/pkg/initlogrusfromtext"
 
@@ -16,15 +16,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	driver "github.com/arangodb/go-driver"
 )
-
-type TempSaveData struct {
-  Text		    string `json:"text"`
-  Language	    string `json:"language"`
-  CustomerId	    int
-  DialogId	    int
-  Consent	    bool
-  NanoTimestamp     int64
-}
 
 var db driver.Database
 
@@ -51,28 +42,45 @@ func init() {
     os.Getenv("ARANGODB_NAME"),
     []string{"chat"},
   )
+
+  if err != nil {
+    log.Fatalf("Error initializing db: %v", err)
+  }
 }
 
 func insertArangoDb(jsonData string) {
   db.Query(nil, "INSERT" + jsonData + "INTO chat", nil)
 }
 
-//TODO: Return error if URL parameters are not int
 func tempSaveData(c *gin.Context) {
-  var chatMessage TempSaveData
-  if err := c.ShouldBindJSON(&chatMessage); err != nil {
+  customerId, err := strconv.Atoi(c.Param("customerId"))
+  if err != nil {
+    errMsg := fmt.Sprintf("CustomerId %s is not an int value", c.Param("customerId"))
+    log.Error(errMsg)
+    c.JSON(http.StatusBadRequest, gin.H{"error": errMsg})
+  }
+  dialogId, err := strconv.Atoi(c.Param("dialogId"))
+  if err != nil {
+    errMsg := fmt.Sprintf("DialogId %s is not an int value", c.Param("dialogId"))
+    log.Error(errMsg)
     c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
   }
-  chatMessage.CustomerId, _ = strconv.Atoi(c.Param("customerId"))
-  chatMessage.DialogId, _ = strconv.Atoi(c.Param("dialogId"))
-  chatMessage.Consent = false
-  chatMessage.NanoTimestamp = time.Now().UnixNano()
+
+  msg := chat.NewEmptyChatMsg(customerId, dialogId)
+  //TODO: This does not prevent the user from overriding the parameter values
+  if err := c.ShouldBindJSON(&msg); err != nil {
+    c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+  }
+  if err != nil {
+    log.Errorf("Could not marshall data for the request")
+  }
+  msg.Insert(db)
   c.JSON(
     http.StatusOK,
     gin.H{
       "message": "received info",
-      "text": chatMessage.Text,
-      "language": chatMessage.Language,
+      "text": msg.Text,
+      "language": msg.Language,
       "customerId": c.Param("customerId"),
       "dialogId": c.Param("dialogId"),
       "error": "none",

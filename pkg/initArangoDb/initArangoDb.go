@@ -37,7 +37,7 @@ func InitDb(client driver.Client, dbName string) (driver.Database, error) {
       return nil, fmt.Errorf("Failed to open existing database: %v", err)
     }
   } else {
-    db, err = client.CreateDatabase(nil, "example", nil)
+    db, err = client.CreateDatabase(nil, dbName, nil)
     if err != nil {
 	    return nil, fmt.Errorf("Failed to create database: %v", err)
     }
@@ -50,7 +50,7 @@ func InitColl(db driver.Database, collName string) error {
   if collExists {
     // fmt.Println("That collection exists already")
   } else {
-    _, err = db.CreateCollection(nil, "users", nil)
+    _, err = db.CreateCollection(nil, collName, nil)
 
     if err != nil {
       return fmt.Errorf("Failed to create collection: %v", err)
