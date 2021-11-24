@@ -21,17 +21,17 @@ type TempSaveData struct {
 func init() {
   appDir, err := localpath.Get()
   if err != nil {
-    log.Fatal("Could not load current running directory", err)
+    log.Fatalf("Could not load current running directory: %v", err)
   }
   err = godotenv.Load(fmt.Sprintf("%s/.env", appDir))
   if err != nil {
     initLog.Init(initLog.FormatText, initLog.OutputStderr, initLog.LevelError)
-    log.Fatal("Error loading .env file", err)
+    log.Fatalf("Error loading .env file: %v", err)
   }
 
   err = initLog.Init(os.Getenv("LOG_LEVEL"), os.Getenv("LOG_OUTPUT"), os.Getenv("LOG_FORMAT"))
   if err != nil {
-    log.Fatal(err.Error())
+    log.Fatalf("Error initializing log settings: %v", err)
   }
 }
 
