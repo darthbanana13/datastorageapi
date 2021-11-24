@@ -25,6 +25,7 @@ func InitDbConn(connStr, user, pass string) (driver.Client, error) {
   return client, err
 }
 
+//TODO: Add a trace log in case logrus is present
 func InitDb(client driver.Client, dbName string) (driver.Database, error) {
   var db driver.Database
 
@@ -44,7 +45,7 @@ func InitDb(client driver.Client, dbName string) (driver.Database, error) {
   return db, nil
 }
 
-func initColl(db driver.Database, collName string) error {
+func InitColl(db driver.Database, collName string) error {
   collExists, err := db.CollectionExists(nil, collName)
   if collExists {
     // fmt.Println("That collection exists already")
@@ -56,4 +57,24 @@ func initColl(db driver.Database, collName string) error {
     }
   }
   return nil
+}
+
+func InitDbWith(connStr, user, pass, dbName string, colls []string) (driver.Database, error) {
+  client, err := InitDbConn(connStr, user, pass)
+  if err != nil {
+    return nil, err
+  }
+
+  db, err := InitDb(client, dbName)
+  if err != nil {
+    return nil, err
+  }
+
+  for _, coll := range colls {
+    err = InitColl(db, coll)
+    if err != nil {
+      return nil, err
+    }
+  }
+  return db, nil
 }
