@@ -1,11 +1,12 @@
 package chat
 
 import (
-	"time"
-	"encoding/json"
+  "time"
+  "encoding/json"
 
-	log "github.com/sirupsen/logrus"
-	driver "github.com/arangodb/go-driver"
+  log "github.com/sirupsen/logrus"
+  container "github.com/golobby/container/v3"
+  driver "github.com/arangodb/go-driver"
 )
 
 type chatMsg struct {
@@ -28,6 +29,16 @@ type chatMsg struct {
   // return msg
 // }
 
+//TODO: Should be moved to another place
+func lazyLoadDbConn() *driver.Database {
+  var db *driver.Database
+  err := container.Resolve(&db)
+  if err != nil {
+    log.Panic("Unable to get DB connection");
+  }
+  return db
+}
+
 func NewEmptyChatMsg(customerId, dialogId int) chatMsg {
   var msg chatMsg
   msg.CustomerId = customerId
@@ -37,11 +48,11 @@ func NewEmptyChatMsg(customerId, dialogId int) chatMsg {
   return msg
 }
 
-//TODO: should not have to pass the database every time
-func (msg *chatMsg) Insert(db driver.Database) {
+func (msg *chatMsg) Insert() {
+  db := lazyLoadDbConn()
   byteChat, err := json.Marshal(msg)
   if err != nil {
     log.Error("Unable to marshal data")
   }
-  db.Query(nil, "INSERT" + string(byteChat) + "INTO chat", nil)
+  (*db).Query(nil, "INSERT" + string(byteChat) + "INTO chat", nil)
 }
