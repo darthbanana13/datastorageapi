@@ -1,23 +1,23 @@
 package main
 
 import (
-  "os"
+	"os"
 
-  "github.com/darthbanana13/datastorageapi/internal/initApp"
-  "github.com/darthbanana13/datastorageapi/internal/controller/chat"
+	"github.com/darthbanana13/datastorageapi/internal/controller/chat"
+	"github.com/darthbanana13/datastorageapi/internal/initApp"
 
-  "github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
 )
 
 func init() {
-  initApp.InitAll()
+	initApp.InitAll()
 }
 
 func main() {
-  router := gin.Default()
+	router := gin.Default()
 
-  router.POST("/data/:customerId/:dialogId", chat.SaveData)
+	router.POST("/data/:customerId/:dialogId", chat.SaveData)
 
-  //TODO: Handle default value
-  router.Run(os.Getenv("SERVER_ADDRESS"))
+	//TODO: Handle default value
+	router.Run(os.Getenv("SERVER_ADDRESS"))
 }
