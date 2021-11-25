@@ -1,8 +1,7 @@
 package chat
 
 import (
-	"fmt"
-	"strconv"
+	"encoding/json"
 	"net/http"
 
 	//TODO: Ideally should depend on service, not the model
@@ -12,38 +11,51 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type saveDataUri struct {
+  CustomerId	uint `uri:"customerId" binding:"required"`
+  DialogId	uint `uri:"dialogId" binding:"required"`
+}
+
+type saveDataPost struct {
+  Text		string `json:"text" binding:"required"`
+  Language	string `json:"language" binding:"required"`
+}
+
 func SaveData(c *gin.Context) {
-  customerId, err := strconv.Atoi(c.Param("customerId"))
-  if err != nil {
-    errMsg := fmt.Sprintf("CustomerId %s is not an int value", c.Param("customerId"))
-    log.Error(errMsg)
-    c.JSON(http.StatusBadRequest, gin.H{"error": errMsg})
-  }
-  dialogId, err := strconv.Atoi(c.Param("dialogId"))
-  if err != nil {
-    errMsg := fmt.Sprintf("DialogId %s is not an int value", c.Param("dialogId"))
-    log.Error(errMsg)
-    c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+  var uriData saveDataUri
+  var postData saveDataPost
+
+  if err := c.Bind(&postData); err != nil {
+    saveDataBindError(c, postData, "post", err)
+    return
   }
 
-  msg := chat.NewEmptyChatMsg(customerId, dialogId)
-  //TODO: This does not prevent the user from overriding the parameter values
-  if err := c.ShouldBindJSON(&msg); err != nil {
-    c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+  if err := c.BindUri(&uriData); err != nil {
+    saveDataBindError(c, uriData, "uri", err)
+    return
   }
-  if err != nil {
-    log.Errorf("Could not marshall data for the request")
-  }
+
+  msg := chat.NewChatMsg(
+    uriData.CustomerId,
+    uriData.DialogId,
+    postData.Text,
+    postData.Language,
+  )
   msg.Insert()
+
   c.JSON(
     http.StatusOK,
-    gin.H{
-      "message": "received info",
-      "text": msg.Text,
-      "language": msg.Language,
-      "customerId": c.Param("customerId"),
-      "dialogId": c.Param("dialogId"),
-      "error": "none",
-    },
+    gin.H{"error": "none"},
   )
+}
+
+func saveDataBindError(c *gin.Context, jsonData interface{}, dataSource string, err error) {
+  strPostVals, malformedErr := json.MarshalIndent(jsonData, "", "  ")
+
+  if malformedErr != nil {
+    log.Errorf("Could not unmarshal %s data from the request\n%s", dataSource ,malformedErr)
+  } else {
+    log.Errorf("Could not bind a %s value(s) to the request structure: %s\n%s", dataSource, strPostVals, err)
+  }
+  c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid values where sent"})
 }

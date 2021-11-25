@@ -10,24 +10,25 @@ import (
 )
 
 type chatMsg struct {
-  Text		string `json:"text"`
-  Language	string `json:"language"`
-  CustomerId	int
-  DialogId	int
+  Text		string
+  Language	string
+  CustomerId	uint
+  DialogId	uint
   Consent	bool
   NanoTimestamp int64
 }
 
 //NOTE: This isn't used anywhere, but seemed appropiate to have it
-// func NewChatMsg(customerId, dialogId int, text, language string) chatMsg {
-  // var msg chatMsg
-  // msg.CustomerId = customerId
-  // msg.DialogId = dialogId
-  // msg.Consent = false
-  // msg.NanoTimestamp = time.Now().UnixNano()
+func NewChatMsg(customerId, dialogId uint, text, language string) chatMsg {
+  var msg chatMsg
 
-  // return msg
-// }
+  msg.CustomerId = customerId
+  msg.DialogId = dialogId
+  msg.Consent = false
+  msg.NanoTimestamp = time.Now().UnixNano()
+
+  return msg
+}
 
 //TODO: Should be moved to another place
 func lazyLoadDbConn() *driver.Database {
@@ -37,15 +38,6 @@ func lazyLoadDbConn() *driver.Database {
     log.Panic("Unable to get DB connection");
   }
   return db
-}
-
-func NewEmptyChatMsg(customerId, dialogId int) chatMsg {
-  var msg chatMsg
-  msg.CustomerId = customerId
-  msg.DialogId = dialogId
-  msg.Consent = false
-  msg.NanoTimestamp = time.Now().UnixNano()
-  return msg
 }
 
 func (msg *chatMsg) Insert() {
