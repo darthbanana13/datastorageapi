@@ -18,6 +18,7 @@ func main() {
 
 	router.POST("/data/:customerId/:dialogId", chat.SaveData)
 	router.POST("/consents/:dialogId", chat.Consent)
+	router.GET("/data", chat.View)
 
 	//TODO: Handle default value
 	router.Run(os.Getenv("SERVER_ADDRESS"))

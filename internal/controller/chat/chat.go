@@ -15,11 +15,13 @@ type saveDataUri struct {
 	DialogId   uint `uri:"dialogId" binding:"required"`
 }
 
+//TODO: Should probably write an own middleware to handle the case insensitive language
 type saveDataPost struct {
 	Text     string `json:"text" binding:"required"`
-	Language string `json:"language" binding:"required"`
+	Language string `json:"language" binding:"required,oneof=en fr it EN FR IT En Fr It eN fR iT"`
 }
 
+//TODO: Prevent duplicate customerId & dialogId combination from being inserted
 func SaveData(c *gin.Context) {
 	var uriData saveDataUri
 	var postData saveDataPost
@@ -42,7 +44,7 @@ func SaveData(c *gin.Context) {
 	); err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
-			gin.H{"error": "Sorry, something went wrong.\nA team of highly trained monkeys has been dispatched to deal with the situation"},
+			gin.H{"error": "Sorry, it's not you, it's me. Let me try again!"},
 		)
 		return
 	}
@@ -73,6 +75,7 @@ type consentPost struct {
 	Consent *bool `json:"consent" binding:"required"`
 }
 
+//TODO: Not sure if an error should be returned if the dialogId does not exist
 func Consent(c *gin.Context) {
 	var uriData consentUri
 	var postData consentPost
@@ -86,5 +89,52 @@ func Consent(c *gin.Context) {
 		bindError(c, uriData, "uri", err)
 		return
 	}
-	chat.Consent(uriData.DialogId, *postData.Consent)
+
+	if err := chat.Consent(uriData.DialogId, *postData.Consent); err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{"error": "Oh no! My spaghetti code is not working properly. I'll be back soon!"},
+		)
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{"error": "none"},
+	)
+}
+
+type viewUri struct {
+	Language       string `form:"language"`
+	CustomerId     uint   `form:"customerId"`
+	EntriesPerPage uint   `form:"entriesPerPage,default=50" binding:"max=200"`
+	Page           uint   `form:"page,default=1"`
+}
+
+func View(c *gin.Context) {
+	var viewData viewUri
+	if err := c.BindQuery(&viewData); err != nil {
+		bindError(c, viewData, "uri", err)
+		return
+	}
+	msgs, err := chat.Filter(
+		map[string]interface{}{
+			"language": viewData.Language,
+			"customerId": viewData.CustomerId,
+			"consent": true,
+		},
+		viewData.Page,
+		viewData.EntriesPerPage,
+	)
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{"error": "Oh no! Cody is sad! Internally sad!"},
+		)
+		return
+	}
+	c.JSON(
+		http.StatusOK,
+		msgs,
+	)
 }
