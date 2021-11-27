@@ -2,6 +2,7 @@ package chat
 
 import (
 	"github.com/darthbanana13/datastorageapi/internal/model/chat"
+	chatRepository "github.com/darthbanana13/datastorageapi/internal/repository/chat"
 
 )
 
@@ -12,14 +13,14 @@ func SaveMsg(customerId, dialogId uint, text, language string) error {
 		text,
 		language,
 	)
-	return msg.Insert()
+	return chatRepository.Insert(msg)
 }
 
 func Consent(dialogId uint, consent bool) error {
 	if consent {
-		return chat.ConsentTrueDialog(dialogId)
+		return chatRepository.ConsentTrueDialog(dialogId)
 	}
-	return chat.DeleteDialog(dialogId)
+	return chatRepository.DeleteDialog(dialogId)
 }
 
 func Filter(allFields map[string]interface{}, page, entriesPerPage uint) ([]map[string]interface{}, error) {
@@ -34,5 +35,5 @@ func Filter(allFields map[string]interface{}, page, entriesPerPage uint) ([]map[
 		}
 	}
 	page = page - 1
-	return chat.AndFilter(fields, entriesPerPage*page, entriesPerPage)
+	return chatRepository.AndFilter(fields, entriesPerPage*page, entriesPerPage)
 }

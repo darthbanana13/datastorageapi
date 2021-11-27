@@ -3,8 +3,6 @@ package aqlBuilder
 import (
     "fmt"
     "strings"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type Builder struct {
