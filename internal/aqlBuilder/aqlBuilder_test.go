@@ -2,8 +2,8 @@ package aqlBuilder_test
 
 import (
 	"regexp"
-	"testing"
 	"strings"
+	"testing"
 
 	"github.com/darthbanana13/datastorageapi/internal/aqlBuilder"
 	"github.com/stretchr/testify/assert"
@@ -17,7 +17,7 @@ func whiteSpaceStripper(s string) string {
 func TestInsert(t *testing.T) {
 	builder := aqlBuilder.NewBuilder("documents")
 	builder.WithInsert(map[string]interface{}{
-		"field1": "value1",
+		"field1":       "value1",
 		"anotherField": 7,
 	})
 	actual := whiteSpaceStripper(builder.Build())
@@ -34,7 +34,7 @@ func TestInsert(t *testing.T) {
 func TestUpdate(t *testing.T) {
 	builder := aqlBuilder.NewBuilder("updater")
 	builder.WithAndFilterCondition(map[string]interface{}{
-		"someField": 5.75,
+		"someField":      5.75,
 		"whatIsInTheBox": "bananas",
 	})
 	builder.WithLoopStatement()
@@ -76,7 +76,7 @@ func TestFilter(t *testing.T) {
 	builder.WithLoopStatement()
 	builder.WithAndFilterCondition(map[string]interface{}{
 		"blockbusterLaunchYear": 2021,
-		"genre": "Sci-Fi",
+		"genre":                 "Sci-Fi",
 	})
 	builder.WithSortFields(map[string]string{
 		"imdbRating": aqlBuilder.Descending,
