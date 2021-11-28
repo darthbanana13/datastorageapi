@@ -15,7 +15,7 @@ type saveDataUri struct {
 	DialogId   uint `uri:"dialogId" binding:"required"`
 }
 
-//TODO: Should probably write an own middleware to handle the case insensitive language
+//TODO: Should probably write an own validator to handle the case insensitive language
 type saveDataPost struct {
 	Text     string `json:"text" binding:"required"`
 	Language string `json:"language" binding:"required,oneof=en fr it EN FR IT En Fr It eN fR iT"`
@@ -104,6 +104,7 @@ func Consent(c *gin.Context) {
 	)
 }
 
+//TODO: Language CustomerId & DialogId could use custom validators
 type viewUri struct {
 	Language       string `form:"language"`
 	CustomerId     uint   `form:"customerId"`
