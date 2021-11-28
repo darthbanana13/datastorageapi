@@ -22,6 +22,7 @@ type Builder struct {
 	boundFields         map[string]interface{}
 }
 
+//TODO: These should probably be they're own type
 const Ascending = "ASC"
 const Descending = "DESC"
 
@@ -42,7 +43,10 @@ func (b *Builder) WithInsert(fields map[string]interface{}) {
 		)
 		b.boundFields[k] = v
 	}
-	b.insertStatement += "INSERT\n{\n" + strings.Join(insertFields, ",\n") + "\n}\nINTO " + b.collectionName + "\n"
+
+	if len(insertFields) < 0 {
+		b.insertStatement += "INSERT\n{\n" + strings.Join(insertFields, ",\n") + "\n}\nINTO " + b.collectionName + "\n"
+	}
 }
 
 func (b *Builder) WithLoopStatement() {
@@ -58,10 +62,13 @@ func (b *Builder) WithAndFilterCondition(fields map[string]interface{}) {
 		)
 		b.boundFields[k] = v
 	}
-	b.filterCondition += strings.Join(filterConditions, "\n") + "\n"
+
+	if len(filterConditions) > 0 {
+		b.filterCondition += strings.Join(filterConditions, "\n") + "\n"
+	}
 }
 
-func (b *Builder) WithSortCondition(fields map[string]string) {
+func (b *Builder) WithSortFields(fields map[string]string) {
 	var sortFields []string
 	for k, v := range fields {
 		sortFields = append(
@@ -69,7 +76,10 @@ func (b *Builder) WithSortCondition(fields map[string]string) {
 			b.collectionInterator+"."+strings.Title(k)+" "+v,
 		)
 	}
-	b.sortFields += "SORT " + strings.Join(sortFields, ", ") + "\n"
+
+	if len(sortFields) > 0 {
+		b.sortFields += "SORT " + strings.Join(sortFields, ", ") + "\n"
+	}
 }
 
 func (b *Builder) WithReturnFields(fields []string) {
@@ -80,7 +90,10 @@ func (b *Builder) WithReturnFields(fields []string) {
 			strings.Title(v)+": "+b.collectionInterator+"."+strings.Title(v),
 		)
 	}
-	b.returnStatement += "RETURN {\n" + strings.Join(returnFields, ",\n") + "\n}\n"
+
+	if len(returnFields) > 0 {
+		b.returnStatement += "RETURN {\n" + strings.Join(returnFields, ",\n") + "\n}\n"
+	}
 }
 
 func (b *Builder) WithLimit(offset, limit uint) {
@@ -102,7 +115,10 @@ func (b *Builder) WithUpdate(fields map[string]interface{}) {
 		)
 		b.boundFields[k] = v
 	}
-	b.updateStatement += "UPDATE " + b.collectionInterator + "._key WITH {" + strings.Join(updateFields, ",\n") + "\n} IN " + b.collectionName + "\n"
+
+	if len(updateFields) > 0 {
+		b.updateStatement += "UPDATE " + b.collectionInterator + "._key WITH {" + strings.Join(updateFields, ",\n") + "\n} IN " + b.collectionName + "\n"
+	}
 }
 
 func (b *Builder) Execute() (driver.Cursor, error) {

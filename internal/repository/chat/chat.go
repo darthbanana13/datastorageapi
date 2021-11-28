@@ -1,13 +1,11 @@
 package chat
 
 import (
-	"strings"
-
 	aql "github.com/darthbanana13/datastorageapi/internal/aqlBuilder"
-	"github.com/darthbanana13/datastorageapi/internal/model/chat"
 	"github.com/darthbanana13/datastorageapi/internal/cursorIterator"
+	"github.com/darthbanana13/datastorageapi/internal/filterBuilder"
+	"github.com/darthbanana13/datastorageapi/internal/model/chat"
 
-	driver "github.com/arangodb/go-driver"
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
 )
@@ -54,18 +52,13 @@ func ConsentTrueDialog(dialogId uint) error {
 	return err
 }
 
-//TODO: Find a clean expressive way to add a ton of parameters
-func AndFilter(fieldConditions map[string]interface{}, offset, limit uint) ([]map[string]interface{}, error) {
-	if val, ok := fieldConditions["language"]; ok {
-		fieldConditions["language"] = strings.ToLower(val.(string))
-	}
-
+func AndFilter(filterParams filterBuilder.FilterParams) ([]map[string]interface{}, error) {
 	aqlBuilder := aql.NewBuilder(chat.CollName)
 	aqlBuilder.WithLoopStatement()
-	aqlBuilder.WithAndFilterCondition(fieldConditions)
-	aqlBuilder.WithSortCondition(map[string]string{"NanoTimestamp": aql.Descending})
-	aqlBuilder.WithReturnFields([]string{"Text", "Language", "CustomerId", "DialogId"})
-	aqlBuilder.WithLimit(offset, limit)
+	aqlBuilder.WithAndFilterCondition(filterParams.GetFieldConditions())
+	aqlBuilder.WithSortFields(filterParams.GetSortFields())
+	aqlBuilder.WithReturnFields(filterParams.GetReturnFields())
+	aqlBuilder.WithLimit(filterParams.GetOffset(), filterParams.GetLimit())
 	cursor, err := aqlBuilder.Execute()
 
 	if err != nil {

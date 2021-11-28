@@ -1,8 +1,10 @@
 package chat
 
 import (
+	"github.com/darthbanana13/datastorageapi/internal/filterBuilder"
 	"github.com/darthbanana13/datastorageapi/internal/model/chat"
 	chatRepository "github.com/darthbanana13/datastorageapi/internal/repository/chat"
+	filterDecorator "github.com/darthbanana13/datastorageapi/internal/service/chatFilterBuilderDecorator"
 )
 
 func SaveMsg(customerId, dialogId uint, text, language string) error {
@@ -22,17 +24,26 @@ func Consent(dialogId uint, consent bool) error {
 	return chatRepository.DeleteDialog(dialogId)
 }
 
-func Filter(allFields map[string]interface{}, page, entriesPerPage uint) ([]map[string]interface{}, error) {
-	fields := make(map[string]interface{})
+//TODO: Make this function smaller
+func FilterNewFirst(allFields map[string]interface{}, page, entriesPerPage uint) ([]map[string]interface{}, error) {
+	filterParams := filterBuilder.NewFilter()
 	for k, v := range allFields {
+		//TODO: These or conditions could probably be written prettier
 		if s, ok := v.(string); ok == true && s != "" {
-			fields[k] = v
+			filterParams.WithFieldCodition(k, v)
 		} else if i, ok := v.(uint); ok == true && i != 0 {
-			fields[k] = v
+			filterParams.WithFieldCodition(k, v)
 		} else if _, ok := v.(bool); ok == true {
-			fields[k] = v
+			filterParams.WithFieldCodition(k, v)
 		}
 	}
-	page = page - 1
-	return chatRepository.AndFilter(fields, entriesPerPage*page, entriesPerPage)
+
+	filterParams.WithOffsetAndLimit(entriesPerPage*(page-1), entriesPerPage)
+	filterParams.WithSortFieldDescending("NanoTimestamp")
+	filterParams.WithReturnField("Text")
+	filterParams.WithReturnField("Language")
+	filterParams.WithReturnField("CustomerId")
+	filterParams.WithReturnField("DialogId")
+
+	return chatRepository.AndFilter(filterDecorator.NewChatFilter(&filterParams))
 }
