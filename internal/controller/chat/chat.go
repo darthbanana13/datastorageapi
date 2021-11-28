@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/darthbanana13/datastorageapi/internal/service/chat"
+	chatService "github.com/darthbanana13/datastorageapi/internal/service/chat"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -36,7 +36,7 @@ func SaveData(c *gin.Context) {
 		return
 	}
 
-	if err := chat.SaveMsg(
+	if err := chatService.SaveMsg(
 		uriData.CustomerId,
 		uriData.DialogId,
 		postData.Text,
@@ -70,7 +70,7 @@ type consentUri struct {
 	DialogId uint `uri:"dialogId" binding:"required"`
 }
 
-//If it changes in the future, rerfer to https://github.com/gin-gonic/gin/issues/814 why binding required does not work with bool
+//If it changes in the future, rerfer to https://github.com/gin-gonic/gin/issues/814 why binding required does not work with bool but with *bool
 type consentPost struct {
 	Consent *bool `json:"consent" binding:"required"`
 }
@@ -90,7 +90,7 @@ func Consent(c *gin.Context) {
 		return
 	}
 
-	if err := chat.Consent(uriData.DialogId, *postData.Consent); err != nil {
+	if err := chatService.Consent(uriData.DialogId, *postData.Consent); err != nil {
 		c.JSON(
 			http.StatusInternalServerError,
 			gin.H{"error": "Oh no! My spaghetti code is not working properly. I'll be back soon!"},
@@ -107,6 +107,7 @@ func Consent(c *gin.Context) {
 type viewUri struct {
 	Language       string `form:"language"`
 	CustomerId     uint   `form:"customerId"`
+	DialogId       uint   `form:"dialogId"`
 	EntriesPerPage uint   `form:"entriesPerPage,default=50" binding:"max=200"`
 	Page           uint   `form:"page,default=1"`
 }
@@ -117,11 +118,12 @@ func View(c *gin.Context) {
 		bindError(c, viewData, "uri", err)
 		return
 	}
-	msgs, err := chat.Filter(
+	msgs, err := chatService.Filter(
 		map[string]interface{}{
-			"language": viewData.Language,
+			"language":   viewData.Language,
 			"customerId": viewData.CustomerId,
-			"consent": true,
+			"dialogId":   viewData.DialogId,
+			"consent":    true,
 		},
 		viewData.Page,
 		viewData.EntriesPerPage,

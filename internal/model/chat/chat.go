@@ -1,8 +1,8 @@
 package chat
 
 import (
-	"time"
 	"strings"
+	"time"
 )
 
 const CollName = "chat"
@@ -28,4 +28,3 @@ func NewChatMsg(customerId, dialogId uint, text, language string) ChatMsg {
 
 	return msg
 }
-

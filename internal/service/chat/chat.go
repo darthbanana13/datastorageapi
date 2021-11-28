@@ -3,7 +3,6 @@ package chat
 import (
 	"github.com/darthbanana13/datastorageapi/internal/model/chat"
 	chatRepository "github.com/darthbanana13/datastorageapi/internal/repository/chat"
-
 )
 
 func SaveMsg(customerId, dialogId uint, text, language string) error {
