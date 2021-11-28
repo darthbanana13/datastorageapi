@@ -5,6 +5,7 @@ import (
 
 	aql "github.com/darthbanana13/datastorageapi/internal/aqlBuilder"
 	"github.com/darthbanana13/datastorageapi/internal/model/chat"
+	"github.com/darthbanana13/datastorageapi/internal/cursorIterator"
 
 	driver "github.com/arangodb/go-driver"
 	"github.com/mitchellh/mapstructure"
@@ -53,7 +54,6 @@ func ConsentTrueDialog(dialogId uint) error {
 	return err
 }
 
-//TODO: Refactor this BS
 //TODO: Find a clean expressive way to add a ton of parameters
 func AndFilter(fieldConditions map[string]interface{}, offset, limit uint) ([]map[string]interface{}, error) {
 	if val, ok := fieldConditions["language"]; ok {
@@ -71,23 +71,5 @@ func AndFilter(fieldConditions map[string]interface{}, offset, limit uint) ([]ma
 	if err != nil {
 		return []map[string]interface{}{}, err
 	}
-	defer cursor.Close()
-
-	var msgs []map[string]interface{}
-
-	for {
-		var msg map[string]interface{}
-		_, err = cursor.ReadDocument(nil, &msg)
-
-		if driver.IsNoMoreDocuments(err) {
-			break
-		} else if err != nil {
-			log.Errorf("Got this chat from the DB: %v", err)
-			return []map[string]interface{}{}, err
-		} else {
-			msgs = append(msgs, msg)
-		}
-	}
-
-	return msgs, nil
+	return cursoriterator.ToMap(cursor)
 }

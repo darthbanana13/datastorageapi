@@ -128,7 +128,7 @@ func (b *Builder) Build() string {
 	return strings.TrimSpace(retrunString)
 }
 
-//TODO: Should be moved to another place
+//TODO: Should be moved to another place or it's probably not that KISS if I just use the container here
 func loadDbConn() *driver.Database {
 	var db *driver.Database
 	err := container.Resolve(&db)
