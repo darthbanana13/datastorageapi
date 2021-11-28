@@ -1,5 +1,6 @@
 package filterBuilder
 
+//TODO: Should probably get rid of internal dependencies & move it to pkg
 import (
 	"github.com/darthbanana13/datastorageapi/internal/aqlBuilder"
 )

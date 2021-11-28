@@ -1,5 +1,6 @@
 package aqlBuilder
 
+//TODO: Should probably get rid of internal dependencies & move it to pkg
 import (
 	"strings"
 
@@ -44,7 +45,7 @@ func (b *Builder) WithInsert(fields map[string]interface{}) {
 		b.boundFields[k] = v
 	}
 
-	if len(insertFields) < 0 {
+	if len(insertFields) > 0 {
 		b.insertStatement += "INSERT\n{\n" + strings.Join(insertFields, ",\n") + "\n}\nINTO " + b.collectionName + "\n"
 	}
 }
@@ -117,7 +118,7 @@ func (b *Builder) WithUpdate(fields map[string]interface{}) {
 	}
 
 	if len(updateFields) > 0 {
-		b.updateStatement += "UPDATE " + b.collectionInterator + "._key WITH {" + strings.Join(updateFields, ",\n") + "\n} IN " + b.collectionName + "\n"
+		b.updateStatement += "UPDATE " + b.collectionInterator + "._key WITH {\n" + strings.Join(updateFields, ",\n") + "\n} IN " + b.collectionName + "\n"
 	}
 }
 
