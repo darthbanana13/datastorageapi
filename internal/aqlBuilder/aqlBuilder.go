@@ -11,7 +11,7 @@ import (
 
 type Builder struct {
 	collectionName      string
-	collectionInterator string
+	collectionIterator	string
 	loopStatement       string
 	insertStatement     string
 	filterCondition     string
@@ -30,7 +30,7 @@ const Descending = "DESC"
 func NewBuilder(collectionName string) Builder {
 	return Builder{
 		collectionName:      collectionName,
-		collectionInterator: string(collectionName[0]),
+		collectionIterator: string(collectionName[0]),
 		boundFields:         make(map[string]interface{}),
 	}
 }
@@ -51,7 +51,7 @@ func (b *Builder) WithInsert(fields map[string]interface{}) {
 }
 
 func (b *Builder) WithLoopStatement() {
-	b.loopStatement += "FOR " + b.collectionInterator + " IN " + b.collectionName + "\n"
+	b.loopStatement += "FOR " + b.collectionIterator + " IN " + b.collectionName + "\n"
 }
 
 func (b *Builder) WithAndFilterCondition(fields map[string]interface{}) {
@@ -59,7 +59,7 @@ func (b *Builder) WithAndFilterCondition(fields map[string]interface{}) {
 	for k, v := range fields {
 		filterConditions = append(
 			filterConditions,
-			"FILTER "+b.collectionInterator+"."+strings.Title(k)+" == @"+k,
+			"FILTER "+b.collectionIterator+"."+strings.Title(k)+" == @"+k,
 		)
 		b.boundFields[k] = v
 	}
@@ -74,7 +74,7 @@ func (b *Builder) WithSortFields(fields map[string]string) {
 	for k, v := range fields {
 		sortFields = append(
 			sortFields,
-			b.collectionInterator+"."+strings.Title(k)+" "+v,
+			b.collectionIterator+"."+strings.Title(k)+" "+v,
 		)
 	}
 
@@ -88,7 +88,7 @@ func (b *Builder) WithReturnFields(fields []string) {
 	for _, v := range fields {
 		returnFields = append(
 			returnFields,
-			strings.Title(v)+": "+b.collectionInterator+"."+strings.Title(v),
+			strings.Title(v)+": "+b.collectionIterator+"."+strings.Title(v),
 		)
 	}
 
@@ -104,7 +104,7 @@ func (b *Builder) WithLimit(offset, limit uint) {
 }
 
 func (b *Builder) WithRemove() {
-	b.removeStatement += "REMOVE " + b.collectionInterator + " IN " + b.collectionName + "\n"
+	b.removeStatement += "REMOVE " + b.collectionIterator + " IN " + b.collectionName + "\n"
 }
 
 func (b *Builder) WithUpdate(fields map[string]interface{}) {
@@ -118,7 +118,7 @@ func (b *Builder) WithUpdate(fields map[string]interface{}) {
 	}
 
 	if len(updateFields) > 0 {
-		b.updateStatement += "UPDATE " + b.collectionInterator + "._key WITH {\n" + strings.Join(updateFields, ",\n") + "\n} IN " + b.collectionName + "\n"
+		b.updateStatement += "UPDATE " + b.collectionIterator + "._key WITH {\n" + strings.Join(updateFields, ",\n") + "\n} IN " + b.collectionName + "\n"
 	}
 }
 
@@ -134,15 +134,15 @@ func (b *Builder) Execute() (driver.Cursor, error) {
 
 //TODO: Should probably do something about each With* function adding a new line at the end then trimming the remaining new lines
 func (b *Builder) Build() string {
-	retrunString := b.loopStatement
-	retrunString += b.insertStatement
-	retrunString += b.filterCondition
-	retrunString += b.updateStatement
-	retrunString += b.sortFields
-	retrunString += b.limitStatement
-	retrunString += b.returnStatement
-	retrunString += b.removeStatement
-	return strings.TrimSpace(retrunString)
+	returnString := b.loopStatement
+	returnString += b.insertStatement
+	returnString += b.filterCondition
+	returnString += b.updateStatement
+	returnString += b.sortFields
+	returnString += b.limitStatement
+	returnString += b.returnStatement
+	returnString += b.removeStatement
+	return strings.TrimSpace(returnString)
 }
 
 //TODO: Should be moved to another place or it's probably not that KISS if I just use the container here
