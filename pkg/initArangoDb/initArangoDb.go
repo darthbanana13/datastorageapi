@@ -46,9 +46,7 @@ func InitDb(client driver.Client, dbName string) (driver.Database, error) {
 
 func InitColl(db driver.Database, collName string) error {
 	collExists, err := db.CollectionExists(nil, collName)
-	if collExists {
-		// fmt.Println("That collection exists already")
-	} else {
+	if !collExists {
 		_, err = db.CreateCollection(nil, collName, nil)
 
 		if err != nil {

@@ -1,7 +1,7 @@
 package cursorIterator
 
 import (
-    driver "github.com/arangodb/go-driver"
+	driver "github.com/arangodb/go-driver"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -12,7 +12,7 @@ func ToMap(cursor driver.Cursor) ([]map[string]interface{}, error) {
 
 	for {
 		var doc map[string]interface{}
-        _, err := cursor.ReadDocument(nil, &doc)
+		_, err := cursor.ReadDocument(nil, &doc)
 
 		if driver.IsNoMoreDocuments(err) {
 			break
