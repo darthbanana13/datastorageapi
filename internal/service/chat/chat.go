@@ -25,7 +25,7 @@ func Consent(dialogId uint, consent bool) error {
 }
 
 //TODO: Make this function smaller
-func FilterNewFirst(allFields map[string]interface{}, page, entriesPerPage uint) ([]map[string]interface{}, error) {
+func FilterAndSortByNewFirst(allFields map[string]interface{}, page, entriesPerPage uint) ([]map[string]interface{}, error) {
 	filterParams := filterBuilder.NewFilter()
 	for k, v := range allFields {
 		//TODO: These or conditions could probably be written prettier

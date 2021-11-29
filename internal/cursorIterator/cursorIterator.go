@@ -1,4 +1,4 @@
-package cursoriterator
+package cursorIterator
 
 import (
     driver "github.com/arangodb/go-driver"

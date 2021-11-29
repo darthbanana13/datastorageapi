@@ -119,7 +119,7 @@ func View(c *gin.Context) {
 		bindError(c, viewData, "uri", err)
 		return
 	}
-	msgs, err := chatService.FilterNewFirst(
+	msgs, err := chatService.FilterAndSortByNewFirst(
 		map[string]interface{}{
 			"language":   viewData.Language,
 			"customerId": viewData.CustomerId,

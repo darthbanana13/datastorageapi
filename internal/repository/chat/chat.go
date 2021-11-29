@@ -64,5 +64,5 @@ func AndFilter(filterParams filterBuilder.FilterParams) ([]map[string]interface{
 	if err != nil {
 		return []map[string]interface{}{}, err
 	}
-	return cursoriterator.ToMap(cursor)
+	return cursorIterator.ToMap(cursor)
 }
